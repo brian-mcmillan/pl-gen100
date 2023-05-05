@@ -1,22 +1,10 @@
-import time
-import sys
-import os
-import html_data
 from bs4 import BeautifulSoup
 from pydoc import html
 import requests
-import spotipy
-import spotipy.util as util
-
-username = input("ENTER USERNAME : ")
-date = input("ENTER DATE (YYYY-MM-DD) : ")
-CLIENT_ID = os.environ["CLIENT_ID"]
-CLIENT_SECRET = os.environ["CLIENT_SECRET"]
-REDIRECT_URI = os.environ["REDIRECT_URI"]
 
 
 def get_soup(url: str) -> html:
-    """Get HTML html_data.py"""
+    """Get HTML data"""
     try:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -55,51 +43,3 @@ def parse_soup(soup) -> dict:
         playlist[song[i].get_text(strip=True)] = artist[i].get_text(strip=True)
 
     return playlist
-
-
-def authenticate():
-    """Authenticate user account credentials"""
-
-    try:
-        token = util.prompt_for_user_token(username,
-                                           # scope -> what information user is willing to give program
-                                           scope='user-library-read playlist-modify-public',
-                                           client_id=CLIENT_ID,
-                                           client_secret=CLIENT_SECRET,
-                                           redirect_uri=REDIRECT_URI)
-
-        if token:
-            print("Authorized.")
-            return token
-
-
-    except ConnectionError as error:
-        print("Error authorizing spotify account. Check credentials and try again.")
-        SystemExit(error)
-
-
-def create_playlist(auth, playlist):
-    """Initialize playlist on spotify account"""
-
-    spotify = spotipy.Spotify(auth)
-    user = spotify.current_user()
-
-    print(f"Welcome, {user['display_name']}!")
-    pl = spotify.user_playlist_create(user=user['id'],
-                                      name=f"{date}",
-                                      description=f"The top 100 songs from {date}.")
-    print(f"Creating Playlist for the top 100 tracks on {date}"), time.sleep(3)
-
-    for key, value in playlist.items():
-        # EX: key = September, value = Earth Wind and Fire
-        # Searches for "Earth Wind and Fire" by type, track. Returns result[0] (most popular)."
-        track_info = spotify.search(q=f"track:%@{key}", type="track")
-        # add to pl
-        print(f"adding track {key} by {value}")
-        try:
-            spotify.user_playlist_add_tracks(user['id'], pl['id'], [track_info["tracks"]["items"][0]["id"]], position=0)
-        except IndexError:
-            print(f"failed to locate track {key} by {value}")
-            continue
-
-    print("\nPlaylist Successfully Created.")
