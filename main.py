@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-import os
 import bb100
 import gpt
 import spotify
 import sys
 
-CLIENT_SECRET = os.environ['CLIENT_SECRET']
-CLIENT_ID = os.environ['CLIENT_ID']
-REDIRECT_URI = os.environ['REDIRECT_URI']
+CLIENT_SECRET = 'e54c338ca622452bb03a4f385313a3ba'
+CLIENT_ID = 'a85a89a90a6347be95a7c70a5f632418'
+REDIRECT_URI = 'https://localhost:1818/callback/'
 
 print("Welcome to the Spotify Playlist Generator.")
 user = input("Enter Spotify Username: ")
@@ -18,12 +17,12 @@ def main():
     print("Enter '1' to generate a playlist of the top 100 songs for a given date.")
     print("Enter '2' to generate a playlist based on artist, song, sentiment, or genre!")
     print("Enter 'Q' to Quit")
-    decision = input()
+    decision = input().lower()
     if decision == '1':
         decision_1()
     elif decision == '2':
         decision_2()
-    elif decision =='Q'.lower():
+    elif decision =='q':
         sys.exit(0)
     else:
         print("Invalid input.")
@@ -36,18 +35,21 @@ def decision_1():
     spotify.create_playlist(token, my_playlist, name=date, description=f"The top 100 songs from {date}")
 
 def decision_2():
-    api_key = input("Enter OpenAI API Key:")
-    authorized = gpt.access_gpt(api_key)
-    if authorized:
-        description = input("Describe your playlist in one or two sentences.")
-        length = input("How many songs would you like to generate?")
-        message = gpt.new_query(length, description)
-        my_playlist = gpt.parse_message(message)
-        print("message")
+    description = input("Describe your playlist in one or two sentences: ")
+    length = input("How many songs would you like to generate?: ")
+    message = gpt.new_query(length, description)
+    my_playlist = gpt.parse_message(message)
+    gpt.display_playlist(my_playlist)
+    answer = input("\nWould you like to add this playlist to your Spotify account? (Y/N): ").lower()
+
+    if answer == 'y':
         name = input("What would you like to name your playlist?: ")
         spotify.create_playlist(token, my_playlist, name=name, description='')
+    else:
+        main()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
 
 
