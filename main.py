@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
+import os
 import bb100
 import gpt
 import spotify
 import sys
 
-CLIENT_SECRET = 'e54c338ca622452bb03a4f385313a3ba'
-CLIENT_ID = 'a85a89a90a6347be95a7c70a5f632418'
-REDIRECT_URI = 'https://localhost:1818/callback/'
+CLIENT_SECRET = os.environ['CLIENT_SECRET']
+CLIENT_ID = os.environ['CLIENT_ID']
+REDIRECT_URI = os.environ['REDIRECT_URI']
 
 print("Welcome to the Spotify Playlist Generator.")
 user = input("Enter Spotify Username: ")
