@@ -1,6 +1,8 @@
+import requests.exceptions
 import spotipy
 import spotipy.util as util
 import time
+import sys
 
 def access_spotify(username, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI):
     """Authenticate user account credentials"""
@@ -18,9 +20,9 @@ def access_spotify(username, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI):
             return token
 
 
-    except ConnectionError as error:
+    except (requests.exceptions.HTTPError, spotipy.oauth2.SpotifyOauthError) as error:
         print("Error authorizing spotify account. Check credentials and try again.")
-        SystemExit(error)
+        sys.exit(1)
 
 
 def create_playlist(auth, playlist, name, description):
@@ -29,7 +31,6 @@ def create_playlist(auth, playlist, name, description):
     spotify = spotipy.Spotify(auth)
     user = spotify.current_user()
 
-    print(f"Welcome, {user['display_name']}!")
     pl = spotify.user_playlist_create(user=user['id'],
                                       name=f"{name}",
                                       description=f"{description}.")
@@ -48,4 +49,4 @@ def create_playlist(auth, playlist, name, description):
             print(f"failed to locate track {key} by {value}")
             continue
 
-    print("\nPlaylist Successfully Created.")
+    print(f"\nPlaylist Successfully Created. Enjoy, {user['display_name']}")
